@@ -1,0 +1,37 @@
+{
+  "name": "ShoppingList",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:native": "turbo -F native dev",
+    "dev:web": "turbo -F web dev",
+    "dev:server": "turbo -F server dev",
+    "db:push": "turbo -F @ShoppingList/db db:push",
+    "db:studio": "turbo -F @ShoppingList/db db:studio",
+    "db:generate": "turbo -F @ShoppingList/db db:generate",
+    "db:migrate": "turbo -F @ShoppingList/db db:migrate",
+    "db:start": "turbo -F @ShoppingList/db db:start",
+    "db:watch": "turbo -F @ShoppingList/db db:watch",
+    "db:stop": "turbo -F @ShoppingList/db db:stop",
+    "db:down": "turbo -F @ShoppingList/db db:down"
+  },
+  "dependencies": {
+    "@ShoppingList/env": "*",
+    "dotenv": "^17.2.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@ShoppingList/config": "*",
+    "@types/node": "^22.13.14",
+    "turbo": "^2.6.3",
+    "typescript": "^5"
+  },
+  "packageManager": "npm@11.6.2"
+}

@@ -1,0 +1,3 @@
+{
+  "extends": "@ShoppingList/config/tsconfig.base.json"
+}
