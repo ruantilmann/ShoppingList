@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 
 import "../index.css";
 import Providers from "@/components/providers";
+import BottomNav from "@/components/bottom-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,9 +28,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}>
         <Providers>
-          <div className="min-h-svh">{children}</div>
+          <div className="flex min-h-svh flex-col">
+            <header className="border-b bg-card px-4 py-3">
+              <div className="mx-auto max-w-3xl text-center text-lg font-semibold">ShoppingList</div>
+            </header>
+            <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+            <BottomNav />
+          </div>
         </Providers>
       </body>
     </html>

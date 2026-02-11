@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
@@ -29,6 +30,7 @@ export default function HomeClient() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const searchParams = useSearchParams();
 
   const lists = useMemo(() => (tab === "owned" ? ownedLists : sharedLists), [tab, ownedLists, sharedLists]);
 
@@ -52,6 +54,15 @@ export default function HomeClient() {
   useEffect(() => {
     loadLists();
   }, []);
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam === "shared") {
+      setTab("shared");
+      return;
+    }
+    setTab("owned");
+  }, [searchParams]);
 
   useEffect(() => {
     if (!isModalOpen) return;
@@ -86,7 +97,7 @@ export default function HomeClient() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-6 pb-24">
+    <div className="container mx-auto max-w-3xl px-4 py-6">
       <div className="flex flex-col gap-4">
         {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -127,32 +138,6 @@ export default function HomeClient() {
       >
         +
       </Button>
-
-      <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card">
-        <div className="mx-auto flex max-w-3xl items-center justify-around px-4 py-2">
-          <Button
-            type="button"
-            variant={tab === "owned" ? "default" : "outline"}
-            onClick={() => setTab("owned")}
-            className="flex-1"
-          >
-            Minhas Listas
-          </Button>
-          <Button
-            type="button"
-            variant={tab === "shared" ? "default" : "outline"}
-            onClick={() => setTab("shared")}
-            className="flex-1 mx-2"
-          >
-            Compartilhadas
-          </Button>
-          <Link href="/account" className="flex-1">
-            <Button type="button" variant="outline" className="w-full">
-              Minha Conta
-            </Button>
-          </Link>
-        </div>
-      </div>
 
       {isModalOpen ? (
         <div
