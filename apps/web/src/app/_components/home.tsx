@@ -86,25 +86,8 @@ export default function HomeClient() {
   };
 
   return (
-    <div className="container mx-auto max-w-3xl px-4 py-6">
+    <div className="container mx-auto max-w-3xl px-4 py-6 pb-24">
       <div className="flex flex-col gap-4">
-        <div className="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setTab("owned")}
-            className={`rounded border px-3 py-1 ${tab === "owned" ? "bg-black text-white" : ""}`}
-          >
-            Minhas Listas
-          </button>
-          <button
-            type="button"
-            onClick={() => setTab("shared")}
-            className={`rounded border px-3 py-1 ${tab === "shared" ? "bg-black text-white" : ""}`}
-          >
-            Listas Compartilhadas
-          </button>
-        </div>
-
         {error && <p className="text-sm text-red-600">{error}</p>}
 
         {isLoading ? (
@@ -139,11 +122,37 @@ export default function HomeClient() {
       <Button
         type="button"
         onClick={() => setIsModalOpen(true)}
-        className="fixed bottom-6 right-6 z-50 h-12 w-12 rounded-full text-2xl shadow"
+        className="fixed bottom-20 right-6 z-50 h-12 w-12 rounded-full text-2xl shadow"
         aria-label="Criar lista"
       >
         +
       </Button>
+
+      <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-card">
+        <div className="mx-auto flex max-w-3xl items-center justify-around px-4 py-2">
+          <Button
+            type="button"
+            variant={tab === "owned" ? "default" : "outline"}
+            onClick={() => setTab("owned")}
+            className="flex-1"
+          >
+            Minhas Listas
+          </Button>
+          <Button
+            type="button"
+            variant={tab === "shared" ? "default" : "outline"}
+            onClick={() => setTab("shared")}
+            className="flex-1 mx-2"
+          >
+            Compartilhadas
+          </Button>
+          <Link href="/account" className="flex-1">
+            <Button type="button" variant="outline" className="w-full">
+              Minha Conta
+            </Button>
+          </Link>
+        </div>
+      </div>
 
       {isModalOpen ? (
         <div
@@ -188,6 +197,7 @@ export default function HomeClient() {
           </div>
         </div>
       ) : null}
+
     </div>
   );
 }
