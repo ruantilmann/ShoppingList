@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 
 import { authClient } from "@/lib/auth-client";
 
-import HomeClient from "./_components/home";
+import ListDetail from "./list-detail";
 
-export default async function Home() {
+export default async function ListPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await authClient.getSession({
     fetchOptions: {
       headers: await headers(),
@@ -17,5 +17,7 @@ export default async function Home() {
     redirect("/login");
   }
 
-  return <HomeClient />;
+  const { id } = await params;
+
+  return <ListDetail listId={id} />;
 }

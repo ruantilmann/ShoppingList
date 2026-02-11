@@ -1,72 +1,64 @@
 # ShoppingList
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines Next.js, Fastify, and more.
+Lista de compras colaborativa com login Google, CRUD de listas/itens e compartilhamento por email.
 
-## Features
+## Stack
+- Next.js (apps/web)
+- Fastify (apps/server)
+- Prisma + Postgres (packages/db)
+- better-auth (packages/auth)
+- Turborepo
+- PWA
 
-- **TypeScript** - For type safety and improved developer experience
-- **Next.js** - Full-stack React framework
-- **TailwindCSS** - Utility-first CSS for rapid UI development
-- **shadcn/ui** - Reusable UI components
-- **Fastify** - Fast, low-overhead web framework
-- **Node.js** - Runtime environment
-- **Prisma** - TypeScript-first ORM
-- **PostgreSQL** - Database engine
-- **Authentication** - Better-Auth
-- **PWA** - Progressive Web App support
-- **Turborepo** - Optimized monorepo build system
-
-## Getting Started
-
-First, install the dependencies:
-
-```bash
-npm install
+## Estrutura do Monorepo
+```
+apps/
+  web/      Next.js
+  server/   Fastify
+packages/
+  auth/     better-auth
+  db/       Prisma + Docker
+  env/      Validacao de env
 ```
 
-## Database Setup
+## Fluxo Geral
+1. Login Google
+2. Home: "Minhas Listas" e "Listas Compartilhadas"
+3. Lista: itens (CRUD + check)
+4. Compartilhamento: owner convida por email
+5. Convites pendentes sao aceitos no primeiro login do email
 
-This project uses PostgreSQL with Prisma.
+## Setup Local
+1. Clonar o repositorio
+2. Criar `.env` a partir de `.env.example`
+   - `apps/server/.env`
+   - `apps/web/.env`
+3. Subir o banco
+   ```bash
+   npm run db:start
+   ```
+4. Rodar migrations
+   ```bash
+   npm run db:migrate
+   ```
+5. Rodar o projeto
+   ```bash
+   npm run dev
+   ```
 
-1. Make sure you have a PostgreSQL database set up.
-2. Update your `apps/server/.env` file with your PostgreSQL connection details.
+Web: http://localhost:3001
+API: http://localhost:3000
 
-3. Apply the schema to your database:
+## Scripts Principais
+- `npm run dev`
+- `npm run dev:web`
+- `npm run dev:server`
+- `npm run db:start`
+- `npm run db:migrate`
+- `npm run db:generate`
+- `npm run db:studio`
 
-```bash
-npm run db:push
-```
-
-Then, run the development server:
-
-```bash
-npm run dev
-```
-
-Open [http://localhost:3001](http://localhost:3001) in your browser to see the web application.
-The API is running at [http://localhost:3000](http://localhost:3000).
-
-## Project Structure
-
-```
-ShoppingList/
-├── apps/
-│   ├── web/         # Frontend application (Next.js)
-│   └── server/      # Backend API (Fastify)
-├── packages/
-│   ├── auth/        # Authentication configuration & logic
-│   └── db/          # Database schema & queries
-```
-
-## Available Scripts
-
-- `npm run dev`: Start all applications in development mode
-- `npm run build`: Build all applications
-- `npm run dev:web`: Start only the web application
-- `npm run dev:server`: Start only the server
-- `npm run check-types`: Check TypeScript types across all apps
-- `npm run db:push`: Push schema changes to database
-- `npm run db:generate`: Generate database client/types
-- `npm run db:migrate`: Run database migrations
-- `npm run db:studio`: Open database studio UI
-- `cd apps/web && npm run generate-pwa-assets`: Generate PWA assets
+## Observacoes
+- Configure Google OAuth (Client ID/Secret) no `.env`.
+- O email do Google e a chave unica de usuario.
+- O owner e o unico que pode excluir lista e gerenciar compartilhamentos.

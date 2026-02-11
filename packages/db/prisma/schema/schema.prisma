@@ -3,6 +3,7 @@ generator client {
   output   = "../generated"
   moduleFormat = "esm"
   runtime = "nodejs"
+  previewFeatures = ["prismaSchemaFolder"]
 }
 
 datasource db {
