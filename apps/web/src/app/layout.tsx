@@ -28,13 +28,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-hidden`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
-          <div className="flex min-h-svh flex-col">
+          <div className="min-h-svh">
             <header className="border-b bg-card px-4 py-3">
               <div className="mx-auto max-w-3xl text-center text-lg font-semibold">ShoppingList</div>
             </header>
-            <main className="flex-1 overflow-y-auto pb-24">{children}</main>
+            <main className="pb-24">{children}</main>
             <BottomNav />
           </div>
         </Providers>

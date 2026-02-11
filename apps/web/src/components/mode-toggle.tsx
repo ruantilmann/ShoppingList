@@ -17,12 +17,12 @@ export function ModeToggle() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger render={<Button variant="outline" />}>
-        <span className="mr-2 inline-flex h-8 w-8 items-center justify-center rounded-md border">
-          <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <DropdownMenuTrigger render={<Button variant="outline" className="h-10 gap-2 px-3" />}>
+        <span className="relative inline-flex h-5 w-5 items-center justify-center">
+          <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
         </span>
-        <span className="text-sm">
+        <span className="text-sm font-medium">
           {theme === "light" ? "Claro" : theme === "dark" ? "Escuro" : "Sistema"}
         </span>
         <span className="sr-only">Toggle theme</span>
