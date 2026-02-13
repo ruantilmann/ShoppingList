@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { Geist, Geist_Mono } from "next/font/google";
+import { ShoppingCart } from "lucide-react";
 
 import "../index.css";
 import Providers from "@/components/providers";
@@ -31,8 +32,16 @@ export default function RootLayout({
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <Providers>
           <div className="min-h-svh">
-            <header className="border-b bg-card px-4 py-3">
-              <div className="mx-auto max-w-3xl text-center text-lg font-semibold">ShoppingList</div>
+            <header className="sticky top-0 z-40 border-b bg-card/95 backdrop-blur">
+              <div className="mx-auto flex max-w-3xl items-center gap-3 px-4 py-4">
+                <div className="flex size-10 items-center justify-center rounded-full border bg-background">
+                  <ShoppingCart className="size-5" aria-hidden />
+                </div>
+                <div>
+                  <p className="text-base font-semibold">ShoppingList</p>
+                  <p className="text-xs text-muted-foreground">Organize suas compras em segundos</p>
+                </div>
+              </div>
             </header>
             <main className="pb-24">{children}</main>
             <BottomNav />
