@@ -5,7 +5,6 @@ import { ShoppingCart } from "lucide-react";
 
 import "../index.css";
 import Providers from "@/components/providers";
-import BottomNav from "@/components/bottom-nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -43,8 +42,7 @@ export default function RootLayout({
                 </div>
               </div>
             </header>
-            <main className="pb-24">{children}</main>
-            <BottomNav />
+            {children}
           </div>
         </Providers>
       </body>
