@@ -144,7 +144,9 @@ export default function ListDetail({ listId }: { listId: string }) {
 
   const handleAddItem = async () => {
     if (!newItem.name.trim()) return;
-    const quantityValue = newItem.quantity.trim() ? Number(newItem.quantity) : undefined;
+    const quantityValue = newItem.quantity.trim()
+      ? Number(newItem.quantity)
+      : undefined;
     const priceValue = newItem.price.trim() ? Number(newItem.price) : undefined;
     await runAction(async () => {
       await api.createItem(listId, {
@@ -154,15 +156,25 @@ export default function ListDetail({ listId }: { listId: string }) {
         market: newItem.market.trim() || undefined,
         unitOfMeasure: newItem.unitOfMeasure,
       });
-      setNewItem({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
+      setNewItem({
+        name: "",
+        quantity: "",
+        price: "",
+        market: "",
+        unitOfMeasure: "UN",
+      });
       setIsAddModalOpen(false);
       await loadList();
     });
   };
 
   const handleUpdateItem = async (itemId: string) => {
-    const quantityValue = editingItem.quantity.trim() ? Number(editingItem.quantity) : null;
-    const priceValue = editingItem.price.trim() ? Number(editingItem.price) : null;
+    const quantityValue = editingItem.quantity.trim()
+      ? Number(editingItem.quantity)
+      : null;
+    const priceValue = editingItem.price.trim()
+      ? Number(editingItem.price)
+      : null;
     await runAction(async () => {
       await api.updateItem(listId, itemId, {
         name: editingItem.name.trim(),
@@ -172,7 +184,13 @@ export default function ListDetail({ listId }: { listId: string }) {
         unitOfMeasure: editingItem.unitOfMeasure,
       });
       setEditingItemId(null);
-      setEditingItem({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
+      setEditingItem({
+        name: "",
+        quantity: "",
+        price: "",
+        market: "",
+        unitOfMeasure: "UN",
+      });
       await loadList();
     });
   };
@@ -226,7 +244,11 @@ export default function ListDetail({ listId }: { listId: string }) {
   if (!list) {
     return (
       <div className="container mx-auto max-w-3xl px-4 py-6">
-        {error ? <p className="text-sm text-red-600">{error}</p> : <p>Carregando...</p>}
+        {error ? (
+          <p className="text-sm text-red-600">{error}</p>
+        ) : (
+          <p>Carregando...</p>
+        )}
       </div>
     );
   }
@@ -255,7 +277,9 @@ export default function ListDetail({ listId }: { listId: string }) {
                 />
                 <Button
                   type="button"
-                  onClick={() => handleRenameList().then(() => setIsEditingTitle(false))}
+                  onClick={() =>
+                    handleRenameList().then(() => setIsEditingTitle(false))
+                  }
                   aria-label="Salvar nome da lista"
                   size="icon"
                 >
@@ -312,7 +336,9 @@ export default function ListDetail({ listId }: { listId: string }) {
             )}
           </div>
           {list.owner ? (
-            <p className="text-xs text-muted-foreground">Owner: {list.owner.email}</p>
+            <p className="text-xs text-muted-foreground">
+              Owner: {list.owner.email}
+            </p>
           ) : null}
         </div>
         <Link href="/" className="text-sm text-muted-foreground">
@@ -322,121 +348,141 @@ export default function ListDetail({ listId }: { listId: string }) {
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      
-
-      <section className="mb-6 rounded border p-3">
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-sm font-medium">Itens</h2>
-        </div>
-        {items.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nenhum item ainda.</p>
-        ) : (
-          <div className="grid gap-2">
-            {items.map((item) => (
-              <div key={item.id} className="rounded border p-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="checkbox"
-                    checked={item.checked}
-                    onChange={(event) => handleToggleItem(item.id, event.target.checked)}
-                  />
-                  <span className={item.checked ? "line-through" : ""}>{item.name}</span>
-                  <div className="flex w-full flex-wrap gap-2">
+      <div className="mb-3 flex items-center justify-between">
+        <h2 className="text-sm font-medium">Itens</h2>
+      </div>
+      {items.length === 0 ? (
+        <p className="text-sm text-muted-foreground">Nenhum item ainda.</p>
+      ) : (
+        <div className="grid gap-2">
+          {items.map((item) => (
+            <div key={item.id} className="rounded border p-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  onChange={(event) =>
+                    handleToggleItem(item.id, event.target.checked)
+                  }
+                />
+                <span className={item.checked ? "line-through" : ""}>
+                  {item.name}
+                </span>
+                <div className="flex w-full flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                    # {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
+                  </span>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                    {formatUnit(item.unitOfMeasure)}
+                  </span>
+                  {item.price != null ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                      # {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
-                    </span>
-                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                      R$ {formatPrice(item.price)} /{" "}
                       {formatUnit(item.unitOfMeasure)}
                     </span>
-                    {item.price != null ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                        R$ {formatPrice(item.price)} / {formatUnit(item.unitOfMeasure)}
-                      </span>
-                    ) : null}
-                    {item.market ? (
-                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                        {item.market}
-                      </span>
-                    ) : null}
-                  </div>
+                  ) : null}
+                  {item.market ? (
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                      {item.market}
+                    </span>
+                  ) : null}
+                </div>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  className="ml-auto"
+                  onClick={() => {
+                    setEditingItemId(item.id);
+                    setEditingItem({
+                      name: item.name,
+                      quantity: item.quantity?.toString() ?? "",
+                      price: item.price?.toString() ?? "",
+                      market: item.market ?? "",
+                      unitOfMeasure: item.unitOfMeasure,
+                    });
+                  }}
+                >
+                  Editar
+                </Button>
+                <Button
+                  type="button"
+                  size="xs"
+                  variant="ghost"
+                  onClick={() => handleDeleteItem(item.id)}
+                >
+                  Remover
+                </Button>
+              </div>
+
+              {editingItemId === item.id ? (
+                <div className="mt-2 grid gap-2 sm:grid-cols-6">
+                  <Input
+                    value={editingItem.name}
+                    onChange={(event) =>
+                      setEditingItem((prev) => ({
+                        ...prev,
+                        name: event.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    value={editingItem.quantity}
+                    onChange={(event) =>
+                      setEditingItem((prev) => ({
+                        ...prev,
+                        quantity: event.target.value,
+                      }))
+                    }
+                  />
+                  <Input
+                    onChange={(event) =>
+                      setEditingItem((prev) => ({
+                        ...prev,
+                        price: parsePriceInput(event.target.value),
+                      }))
+                    }
+                    inputMode="decimal"
+                    value={formatPriceInput(editingItem.price)}
+                    aria-label="Preco"
+                  />
+                  <Input
+                    value={editingItem.market}
+                    onChange={(event) =>
+                      setEditingItem((prev) => ({
+                        ...prev,
+                        market: event.target.value,
+                      }))
+                    }
+                    placeholder="Mercado"
+                  />
+                  <select
+                    value={editingItem.unitOfMeasure}
+                    onChange={(event) =>
+                      setEditingItem((prev) => ({
+                        ...prev,
+                        unitOfMeasure: event.target.value as UnitOfMeasure,
+                      }))
+                    }
+                    className="h-9 rounded border bg-background px-3 text-sm"
+                  >
+                    <option value="UN">Unidade (un)</option>
+                    <option value="KG">Quilograma (kg)</option>
+                    <option value="ML">Mililitro (ml)</option>
+                  </select>
                   <Button
                     type="button"
-                    size="xs"
-                    variant="ghost"
-                    className="ml-auto"
-                    onClick={() => {
-                      setEditingItemId(item.id);
-                      setEditingItem({
-                        name: item.name,
-                        quantity: item.quantity?.toString() ?? "",
-                        price: item.price?.toString() ?? "",
-                        market: item.market ?? "",
-                        unitOfMeasure: item.unitOfMeasure,
-                      });
-                    }}
+                    size="sm"
+                    onClick={() => handleUpdateItem(item.id)}
                   >
-                    Editar
-                  </Button>
-                  <Button
-                    type="button"
-                    size="xs"
-                    variant="ghost"
-                    onClick={() => handleDeleteItem(item.id)}
-                  >
-                    Remover
+                    Salvar
                   </Button>
                 </div>
-
-                {editingItemId === item.id ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-6">
-                    <Input
-                      value={editingItem.name}
-                      onChange={(event) => setEditingItem((prev) => ({ ...prev, name: event.target.value }))}
-                    />
-                    <Input
-                      value={editingItem.quantity}
-                      onChange={(event) => setEditingItem((prev) => ({ ...prev, quantity: event.target.value }))}
-                    />
-                    <Input
-                      onChange={(event) =>
-                        setEditingItem((prev) => ({
-                          ...prev,
-                          price: parsePriceInput(event.target.value),
-                        }))
-                      }
-                      inputMode="decimal"
-                      value={formatPriceInput(editingItem.price)}
-                      aria-label="Preco"
-                    />
-                    <Input
-                      value={editingItem.market}
-                      onChange={(event) => setEditingItem((prev) => ({ ...prev, market: event.target.value }))}
-                      placeholder="Mercado"
-                    />
-                    <select
-                      value={editingItem.unitOfMeasure}
-                      onChange={(event) =>
-                        setEditingItem((prev) => ({
-                          ...prev,
-                          unitOfMeasure: event.target.value as UnitOfMeasure,
-                        }))
-                      }
-                      className="h-9 rounded border bg-background px-3 text-sm"
-                    >
-                      <option value="UN">Unidade (un)</option>
-                      <option value="KG">Quilograma (kg)</option>
-                      <option value="ML">Mililitro (ml)</option>
-                    </select>
-                    <Button type="button" size="sm" onClick={() => handleUpdateItem(item.id)}>
-                      Salvar
-                    </Button>
-                  </div>
-                ) : null}
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      )}
 
       <Button
         type="button"
@@ -461,7 +507,9 @@ export default function ListDetail({ listId }: { listId: string }) {
               <Input
                 ref={addItemInputRef}
                 value={newItem.name}
-                onChange={(event) => setNewItem((prev) => ({ ...prev, name: event.target.value }))}
+                onChange={(event) =>
+                  setNewItem((prev) => ({ ...prev, name: event.target.value }))
+                }
                 placeholder="Item"
               />
               <select
@@ -480,7 +528,12 @@ export default function ListDetail({ listId }: { listId: string }) {
               </select>
               <Input
                 value={newItem.quantity}
-                onChange={(event) => setNewItem((prev) => ({ ...prev, quantity: event.target.value }))}
+                onChange={(event) =>
+                  setNewItem((prev) => ({
+                    ...prev,
+                    quantity: event.target.value,
+                  }))
+                }
                 placeholder="Qtd"
               />
               <Input
@@ -496,12 +549,21 @@ export default function ListDetail({ listId }: { listId: string }) {
               />
               <Input
                 value={newItem.market}
-                onChange={(event) => setNewItem((prev) => ({ ...prev, market: event.target.value }))}
+                onChange={(event) =>
+                  setNewItem((prev) => ({
+                    ...prev,
+                    market: event.target.value,
+                  }))
+                }
                 placeholder="Mercado"
               />
             </div>
             <div className="mt-4 flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsAddModalOpen(false)}
+              >
                 Cancelar
               </Button>
               <Button type="button" onClick={handleAddItem}>
@@ -535,16 +597,28 @@ export default function ListDetail({ listId }: { listId: string }) {
               </Button>
             </div>
             {shares.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Nenhum compartilhamento.</p>
+              <p className="text-sm text-muted-foreground">
+                Nenhum compartilhamento.
+              </p>
             ) : (
               <div className="grid gap-2">
                 {shares.map((share) => (
-                  <div key={share.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                  <div
+                    key={share.id}
+                    className="flex items-center justify-between rounded border px-3 py-2 text-sm"
+                  >
                     <div>
                       <p>{share.inviteeUser?.email ?? share.inviteeEmail}</p>
-                      <p className="text-xs text-muted-foreground">{share.status}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {share.status}
+                      </p>
                     </div>
-                    <Button type="button" size="xs" variant="ghost" onClick={() => handleRemoveShare(share.id)}>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => handleRemoveShare(share.id)}
+                    >
                       Remover
                     </Button>
                   </div>
@@ -552,7 +626,11 @@ export default function ListDetail({ listId }: { listId: string }) {
               </div>
             )}
             <div className="mt-4 flex justify-end">
-              <Button type="button" variant="outline" onClick={() => setIsShareModalOpen(false)}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsShareModalOpen(false)}
+              >
                 Fechar
               </Button>
             </div>
