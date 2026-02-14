@@ -357,18 +357,54 @@ export default function ListDetail({ listId }: { listId: string }) {
         <div className="grid gap-2">
           {items.map((item) => (
             <div key={item.id} className="rounded border p-2">
-              <div className="flex flex-wrap items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={item.checked}
-                  onChange={(event) =>
-                    handleToggleItem(item.id, event.target.checked)
-                  }
-                />
-                <span className={item.checked ? "line-through" : ""}>
-                  {item.name}
-                </span>
-                <div className="flex w-full flex-wrap gap-2">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={item.checked}
+                      onChange={(event) =>
+                        handleToggleItem(item.id, event.target.checked)
+                      }
+                    />
+                    <span className={item.checked ? "line-through" : ""}>
+                      {item.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {item.price != null && item.quantity != null ? (
+                      <span className="text-xs font-semibold">
+                        R$ {formatPrice(item.price * item.quantity)}
+                      </span>
+                    ) : null}
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => {
+                        setEditingItemId(item.id);
+                        setEditingItem({
+                          name: item.name,
+                          quantity: item.quantity?.toString() ?? "",
+                          price: item.price?.toString() ?? "",
+                          market: item.market ?? "",
+                          unitOfMeasure: item.unitOfMeasure,
+                        });
+                      }}
+                    >
+                      Editar
+                    </Button>
+                    <Button
+                      type="button"
+                      size="xs"
+                      variant="ghost"
+                      onClick={() => handleDeleteItem(item.id)}
+                    >
+                      Remover
+                    </Button>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
                     # {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
                   </span>
@@ -377,8 +413,7 @@ export default function ListDetail({ listId }: { listId: string }) {
                   </span>
                   {item.price != null ? (
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
-                      R$ {formatPrice(item.price)} /{" "}
-                      {formatUnit(item.unitOfMeasure)}
+                      R$ {formatPrice(item.price)} / {formatUnit(item.unitOfMeasure)}
                     </span>
                   ) : null}
                   {item.market ? (
@@ -387,32 +422,6 @@ export default function ListDetail({ listId }: { listId: string }) {
                     </span>
                   ) : null}
                 </div>
-                <Button
-                  type="button"
-                  size="xs"
-                  variant="ghost"
-                  className="ml-auto"
-                  onClick={() => {
-                    setEditingItemId(item.id);
-                    setEditingItem({
-                      name: item.name,
-                      quantity: item.quantity?.toString() ?? "",
-                      price: item.price?.toString() ?? "",
-                      market: item.market ?? "",
-                      unitOfMeasure: item.unitOfMeasure,
-                    });
-                  }}
-                >
-                  Editar
-                </Button>
-                <Button
-                  type="button"
-                  size="xs"
-                  variant="ghost"
-                  onClick={() => handleDeleteItem(item.id)}
-                >
-                  Remover
-                </Button>
               </div>
 
               {editingItemId === item.id ? (
