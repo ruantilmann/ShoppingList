@@ -43,16 +43,20 @@ const listCreateSchema = z.object({
   name: z.string().min(1).max(120),
 });
 
+const unitOfMeasureSchema = z.enum(["KG", "ML", "UN"]);
+
 const itemCreateSchema = z.object({
   name: z.string().min(1).max(200),
   quantity: z.coerce.number().finite().optional(),
-  unit: z.string().max(40).optional(),
+  price: z.coerce.number().finite().optional(),
+  unitOfMeasure: unitOfMeasureSchema,
 });
 
 const itemUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   quantity: z.coerce.number().finite().optional().nullable(),
-  unit: z.string().max(40).optional().nullable(),
+  price: z.coerce.number().finite().optional().nullable(),
+  unitOfMeasure: unitOfMeasureSchema.optional(),
 });
 
 const itemCheckSchema = z.object({
@@ -297,7 +301,8 @@ fastify.post("/lists/:id/items", async (request, reply) => {
       listId: access.list.id,
       name: parsedBody.data.name.trim(),
       quantity: parsedBody.data.quantity ?? null,
-      unit: parsedBody.data.unit?.trim() || null,
+      price: parsedBody.data.price ?? null,
+      unitOfMeasure: parsedBody.data.unitOfMeasure,
     },
   });
 
@@ -335,7 +340,8 @@ fastify.patch("/lists/:id/items/:itemId", async (request, reply) => {
     data: {
       name: parsedBody.data.name?.trim() ?? undefined,
       quantity: parsedBody.data.quantity === undefined ? undefined : parsedBody.data.quantity,
-      unit: parsedBody.data.unit === undefined ? undefined : parsedBody.data.unit?.trim() || null,
+      price: parsedBody.data.price === undefined ? undefined : parsedBody.data.price,
+      unitOfMeasure: parsedBody.data.unitOfMeasure === undefined ? undefined : parsedBody.data.unitOfMeasure,
     },
   });
 

@@ -39,12 +39,20 @@ export const api = {
     request<{ list: any }>(`/lists/${id}`, { method: "PATCH", body: JSON.stringify({ name }) }),
   deleteList: (id: string) => request<void>(`/lists/${id}`, { method: "DELETE" }),
   getList: (id: string) => request<{ list: any; role: "OWNER" | "PARTICIPANT" }>(`/lists/${id}`),
-  createItem: (listId: string, payload: { name: string; quantity?: number; unit?: string }) =>
+  createItem: (
+    listId: string,
+    payload: { name: string; quantity?: number; price?: number; unitOfMeasure: "KG" | "ML" | "UN" },
+  ) =>
     request<{ item: any }>(`/lists/${listId}/items`, { method: "POST", body: JSON.stringify(payload) }),
   updateItem: (
     listId: string,
     itemId: string,
-    payload: { name?: string; quantity?: number | null; unit?: string | null },
+    payload: {
+      name?: string;
+      quantity?: number | null;
+      price?: number | null;
+      unitOfMeasure?: "KG" | "ML" | "UN";
+    },
   ) =>
     request<{ item: any }>(`/lists/${listId}/items/${itemId}`, {
       method: "PATCH",

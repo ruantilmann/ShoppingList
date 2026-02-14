@@ -1,15 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Check, Pencil, Plus, Share2, Trash2, X } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 type ListItem = {
   id: string;
   name: string;
   quantity: number | null;
-  unit: string | null;
+  price: number | null;
+  unitOfMeasure: UnitOfMeasure;
   checked: boolean;
 };
 
@@ -28,20 +32,55 @@ type ListData = {
   items: ListItem[];
 };
 
+type UnitOfMeasure = "KG" | "ML" | "UN";
+
 export default function ListDetail({ listId }: { listId: string }) {
   const [list, setList] = useState<ListData | null>(null);
   const [role, setRole] = useState<"OWNER" | "PARTICIPANT" | null>(null);
   const [shares, setShares] = useState<ShareItem[]>([]);
-  const [newItem, setNewItem] = useState({ name: "", quantity: "", unit: "" });
+  const [newItem, setNewItem] = useState<{
+    name: string;
+    quantity: string;
+    price: string;
+    unitOfMeasure: UnitOfMeasure;
+  }>({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [newShareEmail, setNewShareEmail] = useState("");
   const [listName, setListName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState({ name: "", quantity: "", unit: "" });
+  const [editingItem, setEditingItem] = useState<{
+    name: string;
+    quantity: string;
+    price: string;
+    unitOfMeasure: UnitOfMeasure;
+  }>({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+  const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const addItemInputRef = useRef<HTMLInputElement | null>(null);
+  const shareEmailInputRef = useRef<HTMLInputElement | null>(null);
 
   const isOwner = role === "OWNER";
 
   const items = useMemo(() => list?.items ?? [], [list]);
+
+  const formatUnit = (unit: UnitOfMeasure) => {
+    if (unit === "KG") return "kg";
+    if (unit === "ML") return "ml";
+    return "un";
+  };
+
+  const formatPrice = (price: number) => price.toFixed(2);
+
+  const parsePriceInput = (value: string) => {
+    const cleaned = value.replace(/[^0-9.,]/g, "");
+    const normalized = cleaned.replace(",", ".");
+    const [whole, decimal] = normalized.split(".");
+    if (!decimal) return whole;
+    return `${whole}.${decimal.replace(/\./g, "")}`;
+  };
+
+  const formatPriceInput = (value: string) => (value ? `R$ ${value}` : "R$ ");
 
   const loadList = async () => {
     try {
@@ -72,30 +111,63 @@ export default function ListDetail({ listId }: { listId: string }) {
     loadList();
   }, [listId]);
 
+  useEffect(() => {
+    if (!isAddModalOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsAddModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    addItemInputRef.current?.focus();
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isAddModalOpen]);
+
+  useEffect(() => {
+    if (!isShareModalOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setIsShareModalOpen(false);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    shareEmailInputRef.current?.focus();
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isShareModalOpen]);
+
   const handleAddItem = async () => {
     if (!newItem.name.trim()) return;
     const quantityValue = newItem.quantity.trim() ? Number(newItem.quantity) : undefined;
+    const priceValue = newItem.price.trim() ? Number(newItem.price) : undefined;
     await runAction(async () => {
       await api.createItem(listId, {
         name: newItem.name.trim(),
         quantity: Number.isFinite(quantityValue) ? quantityValue : undefined,
-        unit: newItem.unit.trim() || undefined,
+        price: Number.isFinite(priceValue) ? priceValue : undefined,
+        unitOfMeasure: newItem.unitOfMeasure,
       });
-      setNewItem({ name: "", quantity: "", unit: "" });
+      setNewItem({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+      setIsAddModalOpen(false);
       await loadList();
     });
   };
 
   const handleUpdateItem = async (itemId: string) => {
     const quantityValue = editingItem.quantity.trim() ? Number(editingItem.quantity) : null;
+    const priceValue = editingItem.price.trim() ? Number(editingItem.price) : null;
     await runAction(async () => {
       await api.updateItem(listId, itemId, {
         name: editingItem.name.trim(),
         quantity: Number.isFinite(quantityValue) ? quantityValue : null,
-        unit: editingItem.unit.trim() || null,
+        price: Number.isFinite(priceValue) ? priceValue : null,
+        unitOfMeasure: editingItem.unitOfMeasure,
       });
       setEditingItemId(null);
-      setEditingItem({ name: "", quantity: "", unit: "" });
+      setEditingItem({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
       await loadList();
     });
   };
@@ -156,9 +228,84 @@ export default function ListDetail({ listId }: { listId: string }) {
 
   return (
     <div className="container mx-auto max-w-3xl px-4 py-6">
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-semibold">{list.name}</h1>
+          <div className="flex flex-wrap items-center gap-3">
+            {isEditingTitle ? (
+              <div className="flex items-center gap-2">
+                <Input
+                  value={listName}
+                  onChange={(event) => setListName(event.target.value)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Enter") {
+                      handleRenameList().then(() => setIsEditingTitle(false));
+                    }
+                    if (event.key === "Escape") {
+                      setListName(list.name);
+                      setIsEditingTitle(false);
+                    }
+                  }}
+                  className="h-9 text-base font-semibold"
+                  aria-label="Editar nome da lista"
+                />
+                <Button
+                  type="button"
+                  onClick={() => handleRenameList().then(() => setIsEditingTitle(false))}
+                  aria-label="Salvar nome da lista"
+                  size="icon"
+                >
+                  <Check className="size-4" aria-hidden />
+                </Button>
+                <Button
+                  type="button"
+                  onClick={() => {
+                    setListName(list.name);
+                    setIsEditingTitle(false);
+                  }}
+                  aria-label="Cancelar edicao do nome"
+                  size="icon"
+                  variant="outline"
+                >
+                  <X className="size-4" aria-hidden />
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h1 className="text-2xl font-semibold">{list.name}</h1>
+                {isOwner ? (
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => setIsEditingTitle(true)}
+                      aria-label="Editar nome da lista"
+                      size="icon"
+                      variant="outline"
+                    >
+                      <Pencil className="size-4" aria-hidden />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => setIsShareModalOpen(true)}
+                      aria-label="Compartilhar lista"
+                      size="icon"
+                      variant="outline"
+                    >
+                      <Share2 className="size-4" aria-hidden />
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={handleDeleteList}
+                      aria-label="Excluir lista"
+                      size="icon"
+                      variant="outline"
+                    >
+                      <Trash2 className="size-4" aria-hidden />
+                    </Button>
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
           {list.owner ? (
             <p className="text-xs text-muted-foreground">Owner: {list.owner.email}</p>
           ) : null}
@@ -170,51 +317,12 @@ export default function ListDetail({ listId }: { listId: string }) {
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
 
-      {isOwner ? (
-        <div className="mb-6 flex flex-col gap-2 rounded border p-3">
-          <p className="text-sm font-medium">Editar lista</p>
-          <div className="flex gap-2">
-            <input
-              value={listName}
-              onChange={(event) => setListName(event.target.value)}
-              className="flex-1 rounded border px-3 py-2"
-            />
-            <button type="button" className="rounded border px-3 py-2" onClick={handleRenameList}>
-              Salvar
-            </button>
-            <button type="button" className="rounded border px-3 py-2" onClick={handleDeleteList}>
-              Excluir
-            </button>
-          </div>
-        </div>
-      ) : null}
+      
 
       <section className="mb-6 rounded border p-3">
-        <h2 className="mb-3 text-sm font-medium">Itens</h2>
-        <div className="mb-4 grid gap-2 sm:grid-cols-4">
-          <input
-            value={newItem.name}
-            onChange={(event) => setNewItem((prev) => ({ ...prev, name: event.target.value }))}
-            placeholder="Item"
-            className="rounded border px-3 py-2"
-          />
-          <input
-            value={newItem.quantity}
-            onChange={(event) => setNewItem((prev) => ({ ...prev, quantity: event.target.value }))}
-            placeholder="Qtd"
-            className="rounded border px-3 py-2"
-          />
-          <input
-            value={newItem.unit}
-            onChange={(event) => setNewItem((prev) => ({ ...prev, unit: event.target.value }))}
-            placeholder="Unidade"
-            className="rounded border px-3 py-2"
-          />
-          <button type="button" className="rounded border px-3 py-2" onClick={handleAddItem}>
-            Adicionar
-          </button>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-sm font-medium">Itens</h2>
         </div>
-
         {items.length === 0 ? (
           <p className="text-sm text-muted-foreground">Nenhum item ainda.</p>
         ) : (
@@ -229,47 +337,76 @@ export default function ListDetail({ listId }: { listId: string }) {
                   />
                   <span className={item.checked ? "line-through" : ""}>{item.name}</span>
                   <span className="text-xs text-muted-foreground">
-                    {item.quantity ?? "-"} {item.unit ?? ""}
+                    {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
                   </span>
-                  <button
+                  {item.price != null ? (
+                    <span className="text-xs text-muted-foreground">R$ {formatPrice(item.price)}</span>
+                  ) : null}
+                  <Button
                     type="button"
-                    className="ml-auto text-xs"
+                    size="xs"
+                    variant="ghost"
+                    className="ml-auto"
                     onClick={() => {
                       setEditingItemId(item.id);
                       setEditingItem({
                         name: item.name,
                         quantity: item.quantity?.toString() ?? "",
-                        unit: item.unit ?? "",
+                        price: item.price?.toString() ?? "",
+                        unitOfMeasure: item.unitOfMeasure,
                       });
                     }}
                   >
                     Editar
-                  </button>
-                  <button type="button" className="text-xs" onClick={() => handleDeleteItem(item.id)}>
+                  </Button>
+                  <Button
+                    type="button"
+                    size="xs"
+                    variant="ghost"
+                    onClick={() => handleDeleteItem(item.id)}
+                  >
                     Remover
-                  </button>
+                  </Button>
                 </div>
 
                 {editingItemId === item.id ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-4">
-                    <input
+                  <div className="mt-2 grid gap-2 sm:grid-cols-5">
+                    <Input
                       value={editingItem.name}
                       onChange={(event) => setEditingItem((prev) => ({ ...prev, name: event.target.value }))}
-                      className="rounded border px-2 py-1"
                     />
-                    <input
+                    <Input
                       value={editingItem.quantity}
                       onChange={(event) => setEditingItem((prev) => ({ ...prev, quantity: event.target.value }))}
-                      className="rounded border px-2 py-1"
                     />
-                    <input
-                      value={editingItem.unit}
-                      onChange={(event) => setEditingItem((prev) => ({ ...prev, unit: event.target.value }))}
-                      className="rounded border px-2 py-1"
+                    <Input
+                      onChange={(event) =>
+                        setEditingItem((prev) => ({
+                          ...prev,
+                          price: parsePriceInput(event.target.value),
+                        }))
+                      }
+                      inputMode="decimal"
+                      value={formatPriceInput(editingItem.price)}
+                      aria-label="Preco"
                     />
-                    <button type="button" className="rounded border px-2 py-1" onClick={() => handleUpdateItem(item.id)}>
+                    <select
+                      value={editingItem.unitOfMeasure}
+                      onChange={(event) =>
+                        setEditingItem((prev) => ({
+                          ...prev,
+                          unitOfMeasure: event.target.value as UnitOfMeasure,
+                        }))
+                      }
+                      className="h-9 rounded border bg-background px-3 text-sm"
+                    >
+                      <option value="UN">Unidade (un)</option>
+                      <option value="KG">Quilograma (kg)</option>
+                      <option value="ML">Mililitro (ml)</option>
+                    </select>
+                    <Button type="button" size="sm" onClick={() => handleUpdateItem(item.id)}>
                       Salvar
-                    </button>
+                    </Button>
                   </div>
                 ) : null}
               </div>
@@ -278,38 +415,121 @@ export default function ListDetail({ listId }: { listId: string }) {
         )}
       </section>
 
-      {isOwner ? (
-        <section className="rounded border p-3">
-          <h2 className="mb-3 text-sm font-medium">Compartilhamento</h2>
-          <div className="mb-4 flex gap-2">
-            <input
-              value={newShareEmail}
-              onChange={(event) => setNewShareEmail(event.target.value)}
-              placeholder="Email do participante"
-              className="flex-1 rounded border px-3 py-2"
-            />
-            <button type="button" className="rounded border px-3 py-2" onClick={handleShare}>
-              Compartilhar
-            </button>
-          </div>
-          {shares.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nenhum compartilhamento.</p>
-          ) : (
-            <div className="grid gap-2">
-              {shares.map((share) => (
-                <div key={share.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
-                  <div>
-                    <p>{share.inviteeUser?.email ?? share.inviteeEmail}</p>
-                    <p className="text-xs text-muted-foreground">{share.status}</p>
-                  </div>
-                  <button type="button" className="text-xs" onClick={() => handleRemoveShare(share.id)}>
-                    Remover
-                  </button>
-                </div>
-              ))}
+      <Button
+        type="button"
+        onClick={() => setIsAddModalOpen(true)}
+        className="fixed bottom-20 right-6 z-50 h-12 w-12 rounded-full shadow-lg"
+        aria-label="Adicionar item"
+      >
+        <Plus className="size-5" aria-hidden />
+      </Button>
+
+      {isAddModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          onClick={() => setIsAddModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg border bg-card p-4 text-foreground shadow"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="mb-3 text-lg font-medium">Adicionar item</h2>
+            <div className="grid gap-3">
+              <Input
+                ref={addItemInputRef}
+                value={newItem.name}
+                onChange={(event) => setNewItem((prev) => ({ ...prev, name: event.target.value }))}
+                placeholder="Item"
+              />
+              <select
+                value={newItem.unitOfMeasure}
+                onChange={(event) =>
+                  setNewItem((prev) => ({
+                    ...prev,
+                    unitOfMeasure: event.target.value as UnitOfMeasure,
+                  }))
+                }
+                className="h-9 rounded border bg-background px-3 text-sm"
+              >
+                <option value="UN">Unidade (un)</option>
+                <option value="KG">Quilograma (kg)</option>
+                <option value="ML">Mililitro (ml)</option>
+              </select>
+              <Input
+                value={newItem.quantity}
+                onChange={(event) => setNewItem((prev) => ({ ...prev, quantity: event.target.value }))}
+                placeholder="Qtd"
+              />
+              <Input
+                value={formatPriceInput(newItem.price)}
+                onChange={(event) =>
+                  setNewItem((prev) => ({
+                    ...prev,
+                    price: parsePriceInput(event.target.value),
+                  }))
+                }
+                inputMode="decimal"
+                aria-label="Preco"
+              />
             </div>
-          )}
-        </section>
+            <div className="mt-4 flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsAddModalOpen(false)}>
+                Cancelar
+              </Button>
+              <Button type="button" onClick={handleAddItem}>
+                Adicionar
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      {isOwner && isShareModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-background/80 p-4 backdrop-blur-sm"
+          onClick={() => setIsShareModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-sm rounded-lg border bg-card p-4 text-foreground shadow"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <h2 className="mb-3 text-lg font-medium">Compartilhar lista</h2>
+            <div className="mb-4 flex gap-2">
+              <Input
+                ref={shareEmailInputRef}
+                value={newShareEmail}
+                onChange={(event) => setNewShareEmail(event.target.value)}
+                placeholder="Email do participante"
+                className="flex-1"
+              />
+              <Button type="button" onClick={handleShare}>
+                Compartilhar
+              </Button>
+            </div>
+            {shares.length === 0 ? (
+              <p className="text-sm text-muted-foreground">Nenhum compartilhamento.</p>
+            ) : (
+              <div className="grid gap-2">
+                {shares.map((share) => (
+                  <div key={share.id} className="flex items-center justify-between rounded border px-3 py-2 text-sm">
+                    <div>
+                      <p>{share.inviteeUser?.email ?? share.inviteeEmail}</p>
+                      <p className="text-xs text-muted-foreground">{share.status}</p>
+                    </div>
+                    <Button type="button" size="xs" variant="ghost" onClick={() => handleRemoveShare(share.id)}>
+                      Remover
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+            <div className="mt-4 flex justify-end">
+              <Button type="button" variant="outline" onClick={() => setIsShareModalOpen(false)}>
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </div>
       ) : null}
     </div>
   );
