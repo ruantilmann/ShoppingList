@@ -35,6 +35,7 @@ model ShoppingItem {
   name      String
   quantity  Float?
   price     Float?
+  market    String?
   unitOfMeasure UnitOfMeasure @default(UN)
   checked   Boolean  @default(false)
   createdAt DateTime @default(now())

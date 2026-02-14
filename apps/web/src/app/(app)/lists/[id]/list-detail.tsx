@@ -13,6 +13,7 @@ type ListItem = {
   name: string;
   quantity: number | null;
   price: number | null;
+  market: string | null;
   unitOfMeasure: UnitOfMeasure;
   checked: boolean;
 };
@@ -42,8 +43,9 @@ export default function ListDetail({ listId }: { listId: string }) {
     name: string;
     quantity: string;
     price: string;
+    market: string;
     unitOfMeasure: UnitOfMeasure;
-  }>({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+  }>({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [newShareEmail, setNewShareEmail] = useState("");
@@ -54,8 +56,9 @@ export default function ListDetail({ listId }: { listId: string }) {
     name: string;
     quantity: string;
     price: string;
+    market: string;
     unitOfMeasure: UnitOfMeasure;
-  }>({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+  }>({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const addItemInputRef = useRef<HTMLInputElement | null>(null);
   const shareEmailInputRef = useRef<HTMLInputElement | null>(null);
@@ -148,9 +151,10 @@ export default function ListDetail({ listId }: { listId: string }) {
         name: newItem.name.trim(),
         quantity: Number.isFinite(quantityValue) ? quantityValue : undefined,
         price: Number.isFinite(priceValue) ? priceValue : undefined,
+        market: newItem.market.trim() || undefined,
         unitOfMeasure: newItem.unitOfMeasure,
       });
-      setNewItem({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+      setNewItem({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
       setIsAddModalOpen(false);
       await loadList();
     });
@@ -164,10 +168,11 @@ export default function ListDetail({ listId }: { listId: string }) {
         name: editingItem.name.trim(),
         quantity: Number.isFinite(quantityValue) ? quantityValue : null,
         price: Number.isFinite(priceValue) ? priceValue : null,
+        market: editingItem.market.trim() || null,
         unitOfMeasure: editingItem.unitOfMeasure,
       });
       setEditingItemId(null);
-      setEditingItem({ name: "", quantity: "", price: "", unitOfMeasure: "UN" });
+      setEditingItem({ name: "", quantity: "", price: "", market: "", unitOfMeasure: "UN" });
       await loadList();
     });
   };
@@ -336,12 +341,24 @@ export default function ListDetail({ listId }: { listId: string }) {
                     onChange={(event) => handleToggleItem(item.id, event.target.checked)}
                   />
                   <span className={item.checked ? "line-through" : ""}>{item.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
-                  </span>
-                  {item.price != null ? (
-                    <span className="text-xs text-muted-foreground">R$ {formatPrice(item.price)}</span>
-                  ) : null}
+                  <div className="flex w-full flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                      # {item.quantity ?? "-"} {formatUnit(item.unitOfMeasure)}
+                    </span>
+                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                      {formatUnit(item.unitOfMeasure)}
+                    </span>
+                    {item.price != null ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                        R$ {formatPrice(item.price)} / {formatUnit(item.unitOfMeasure)}
+                      </span>
+                    ) : null}
+                    {item.market ? (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-medium text-emerald-700">
+                        {item.market}
+                      </span>
+                    ) : null}
+                  </div>
                   <Button
                     type="button"
                     size="xs"
@@ -353,6 +370,7 @@ export default function ListDetail({ listId }: { listId: string }) {
                         name: item.name,
                         quantity: item.quantity?.toString() ?? "",
                         price: item.price?.toString() ?? "",
+                        market: item.market ?? "",
                         unitOfMeasure: item.unitOfMeasure,
                       });
                     }}
@@ -370,7 +388,7 @@ export default function ListDetail({ listId }: { listId: string }) {
                 </div>
 
                 {editingItemId === item.id ? (
-                  <div className="mt-2 grid gap-2 sm:grid-cols-5">
+                  <div className="mt-2 grid gap-2 sm:grid-cols-6">
                     <Input
                       value={editingItem.name}
                       onChange={(event) => setEditingItem((prev) => ({ ...prev, name: event.target.value }))}
@@ -389,6 +407,11 @@ export default function ListDetail({ listId }: { listId: string }) {
                       inputMode="decimal"
                       value={formatPriceInput(editingItem.price)}
                       aria-label="Preco"
+                    />
+                    <Input
+                      value={editingItem.market}
+                      onChange={(event) => setEditingItem((prev) => ({ ...prev, market: event.target.value }))}
+                      placeholder="Mercado"
                     />
                     <select
                       value={editingItem.unitOfMeasure}
@@ -470,6 +493,11 @@ export default function ListDetail({ listId }: { listId: string }) {
                 }
                 inputMode="decimal"
                 aria-label="Preco"
+              />
+              <Input
+                value={newItem.market}
+                onChange={(event) => setNewItem((prev) => ({ ...prev, market: event.target.value }))}
+                placeholder="Mercado"
               />
             </div>
             <div className="mt-4 flex justify-end gap-2">

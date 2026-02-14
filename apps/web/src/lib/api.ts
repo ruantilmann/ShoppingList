@@ -41,7 +41,13 @@ export const api = {
   getList: (id: string) => request<{ list: any; role: "OWNER" | "PARTICIPANT" }>(`/lists/${id}`),
   createItem: (
     listId: string,
-    payload: { name: string; quantity?: number; price?: number; unitOfMeasure: "KG" | "ML" | "UN" },
+    payload: {
+      name: string;
+      quantity?: number;
+      price?: number;
+      market?: string;
+      unitOfMeasure: "KG" | "ML" | "UN";
+    },
   ) =>
     request<{ item: any }>(`/lists/${listId}/items`, { method: "POST", body: JSON.stringify(payload) }),
   updateItem: (
@@ -51,6 +57,7 @@ export const api = {
       name?: string;
       quantity?: number | null;
       price?: number | null;
+      market?: string | null;
       unitOfMeasure?: "KG" | "ML" | "UN";
     },
   ) =>

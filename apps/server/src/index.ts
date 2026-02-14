@@ -49,6 +49,7 @@ const itemCreateSchema = z.object({
   name: z.string().min(1).max(200),
   quantity: z.coerce.number().finite().optional(),
   price: z.coerce.number().finite().optional(),
+  market: z.string().max(120).optional(),
   unitOfMeasure: unitOfMeasureSchema,
 });
 
@@ -56,6 +57,7 @@ const itemUpdateSchema = z.object({
   name: z.string().min(1).max(200).optional(),
   quantity: z.coerce.number().finite().optional().nullable(),
   price: z.coerce.number().finite().optional().nullable(),
+  market: z.string().max(120).optional().nullable(),
   unitOfMeasure: unitOfMeasureSchema.optional(),
 });
 
@@ -302,6 +304,7 @@ fastify.post("/lists/:id/items", async (request, reply) => {
       name: parsedBody.data.name.trim(),
       quantity: parsedBody.data.quantity ?? null,
       price: parsedBody.data.price ?? null,
+      market: parsedBody.data.market?.trim() || null,
       unitOfMeasure: parsedBody.data.unitOfMeasure,
     },
   });
@@ -341,6 +344,7 @@ fastify.patch("/lists/:id/items/:itemId", async (request, reply) => {
       name: parsedBody.data.name?.trim() ?? undefined,
       quantity: parsedBody.data.quantity === undefined ? undefined : parsedBody.data.quantity,
       price: parsedBody.data.price === undefined ? undefined : parsedBody.data.price,
+      market: parsedBody.data.market === undefined ? undefined : parsedBody.data.market?.trim() || null,
       unitOfMeasure: parsedBody.data.unitOfMeasure === undefined ? undefined : parsedBody.data.unitOfMeasure,
     },
   });
